@@ -55,12 +55,12 @@ resource "proxmox_virtual_environment_vm" "talos_worker_01" {
   on_boot     = true
 
   cpu {
-    cores = 4
+    cores = 13
     type = "x86-64-v2-AES"
   }
 
   memory {
-    dedicated = 4096
+    dedicated = 20480
   }
 
   agent {
