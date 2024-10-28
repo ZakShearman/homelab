@@ -1,0 +1,17 @@
+.idea
+# Ignore packer for now as it's unused.
+packer
+
+# Terraform
+**/.terraform/*
+*.tfoverride
+*.auto.tfvars
+
+*.tfstate
+*.tfstate.*
+
+# Envrc
+.envrc
+
+kubeconfig
+talosconfig
