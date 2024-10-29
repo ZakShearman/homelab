@@ -1,0 +1,10 @@
+immich:
+  persistence:
+    library:
+      existingClaim: "immich-pvc"
+
+redis:
+  enabled: false
+
+image:
+  tag: "v1.119.0"
