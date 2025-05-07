@@ -15,11 +15,14 @@ resource "helm_release" "longhorn" {
   namespace  = var.longhorn_namespace
   version    = var.longhorn_version
 
-  # values = [
-  #   yamlencode({
-  #
-  #   })
-  # ]
+  values = [
+    yamlencode({
+      persistence = {
+        // There is only a single node, so this has to be 1 for now
+        defaultClassReplicaCount = 1
+      }
+    })
+  ]
 
   wait = true
   # If the install fails, automatically roll back

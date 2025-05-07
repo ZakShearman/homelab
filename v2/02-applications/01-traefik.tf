@@ -26,7 +26,7 @@ resource "kubernetes_secret" "traefik_cf_api_key" {
     CLOUDFLARE_DNS_API_TOKEN = data.sops_file.secrets.data["cloudflare_dns_api_token"]
   }
 
-  depends_on = [kubernetes_namespace.traefik]
+  depends_on = [kubernetes_namespace.traefik, data.sops_file.secrets]
 }
 
 resource "helm_release" "traefik" {

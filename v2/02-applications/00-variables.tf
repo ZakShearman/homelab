@@ -115,3 +115,15 @@ variable "openspeedtest_chart_version" {
 }
 
 ## Speed Test End
+
+## Firefly III Start
+
+variable "firefly_namespace" {
+  type = string
+}
+
+variable "firefly_chart_version" {
+  type = string
+}
+
+## Firefly III End
