@@ -1,3 +1,9 @@
+v2/02-applications/files/secrets.yaml
+v2/02-applications/files/cloudflare-tunnel-creds.json
+
+# Ignore 01-infra right now since secrets aren't correctly hidden
+v2/01-infra
+
 .idea
 # Ignore packer for now as it's unused.
 packer
