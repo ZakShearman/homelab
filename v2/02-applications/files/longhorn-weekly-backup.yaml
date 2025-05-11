@@ -1,0 +1,12 @@
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: weekly-default-backup
+  namespace: longhorn-system # RecurringJobs must be in the longhorn-system namespace
+spec:
+  name: weekly-default-backup
+  cron: "0 3 * * 1"  # Every Monday at 3am
+  task: "backup"
+  retain: 1           # Keep the last 2 successful weekly backups
+  concurrency: 2      # Only run one backup job at a time for now (since upload speed). TODO: can we restrict the pod's network speed to prevent entire slowdown
+  groups: ["default"]  # 'default' is automatically added to volumes with no recurring jobs

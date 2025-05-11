@@ -3,7 +3,7 @@ resource "kubernetes_namespace" "longhorn" {
     name = var.longhorn_namespace
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
-      "pod-security.kubernetes.io/enforce": "privileged"
+      "pod-security.kubernetes.io/enforce" = "privileged"
     }
   }
 }
@@ -21,13 +21,42 @@ resource "helm_release" "longhorn" {
         // There is only a single node, so this has to be 1 for now
         defaultClassReplicaCount = 1
       }
+
+      defaultBackupStore = {
+        backupTarget = "s3://${data.sops_file.secrets.data["longhorn_backblaze_bucket_name"]}@${data.sops_file.secrets.data["longhorn_backblaze_bucket_region"]}/"
+        backupTargetCredentialSecret = kubernetes_secret.longhorn_backblaze_backups.metadata[0].name
+        pollInternal = "5m"
+      }
     })
   ]
 
   wait = true
   # If the install fails, automatically roll back
-  atomic  = true
+  atomic = true
   timeout = 180 # 3 minutes
 
-  depends_on = [kubernetes_namespace.longhorn]
+  depends_on = [kubernetes_namespace.longhorn, kubernetes_secret.longhorn_backblaze_backups]
+}
+
+resource "kubernetes_secret" "longhorn_backblaze_backups" {
+  metadata {
+    name      = "longhorn-backup-secret"
+    namespace = kubernetes_namespace.longhorn.metadata[0].name
+  }
+
+  type = "Opaque"
+
+  data = {
+    AWS_ACCESS_KEY_ID     = data.sops_file.secrets.data["longhorn_backblaze_access_key_id"]
+    AWS_SECRET_ACCESS_KEY = data.sops_file.secrets.data["longhorn_backblaze_secret_access_key"]
+    AWS_ENDPOINTS         = var.longhorn_s3_endpoint
+  }
+
+  depends_on = [var.longhorn_namespace, data.sops_file.secrets]
+}
+
+resource "kubectl_manifest" "backblaze_weekly_backup" {
+  yaml_body = file("files/longhorn-weekly-backup.yaml")
+
+  depends_on = [kubernetes_namespace.longhorn, helm_release.longhorn]
 }
