@@ -5,6 +5,7 @@ kubeconfig_context = "admin@project-a"
 
 longhorn_namespace = "longhorn-system"
 longhorn_version   = "1.8.1"
+longhorn_s3_endpoint = "https://s3.eu-central-003.backblazeb2.com"
 
 tailscale_operator_namespace     = "tailscale"
 tailscale_operator_chart_version = "1.82.5"
@@ -25,6 +26,10 @@ cloudflare_tunnel_svcs = [
   {
     hostname    = "firefly.shearman.cloud"
     service_uri = "http://firefly-iii.firefly.svc.cluster.local:80"
+  },
+  {
+    hostname = "grafana.shearman.cloud"
+    service_uri = "http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80"
   }
 ]
 
@@ -40,3 +45,8 @@ openspeedtest_chart_version = "0.1.2"
 
 firefly_namespace     = "firefly"
 firefly_chart_version = "0.8.2"
+
+kubescape_namespace = "kubescape"
+kubescape_chart_version   = "1.27.5"
+
+kube_prometheus_stack_version = "71.1.1"

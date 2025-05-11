@@ -21,6 +21,10 @@ variable "longhorn_version" {
   type = string
 }
 
+variable "longhorn_s3_endpoint" {
+  type = string
+}
+
 ## Longhorn End
 
 ## Tailscale Start
@@ -127,3 +131,23 @@ variable "firefly_chart_version" {
 }
 
 ## Firefly III End
+
+## Kubescape Start
+
+variable "kubescape_namespace" {
+  type = string
+}
+
+variable "kubescape_chart_version" {
+  type = string
+}
+
+## Kubescape End
+
+## Monitoring Start
+
+variable "kube_prometheus_stack_version" {
+  type = string
+}
+
+## Monitoring End
