@@ -91,7 +91,7 @@ resource "kubernetes_persistent_volume_claim" "immich" {
     access_modes = ["ReadWriteMany"]
     resources {
       requests = {
-        storage = "50Gi"
+        storage = "100Gi"
       }
     }
   }
