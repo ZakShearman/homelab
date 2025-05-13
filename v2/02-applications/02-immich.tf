@@ -151,3 +151,39 @@ resource "helm_release" "immich" {
 
   depends_on = [kubernetes_persistent_volume_claim.immich, kubectl_manifest.immich_pgql_cluster]
 }
+
+resource "kubectl_manifest" "immich_ingressroute" {
+  yaml_body = yamlencode({
+    apiVersion = "traefik.io/v1alpha1"
+    kind       = "IngressRoute"
+
+    metadata = {
+      name      = "immich"
+      namespace = kubernetes_namespace.immich.metadata[0].name
+      annotations = {
+        "app.kubernetes.io/managed-by" = "terraform"
+      }
+    }
+
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`photos.shearman.cloud`)"
+          services = [
+            {
+              name = "immich-server"
+              port = 2283
+            }
+          ]
+        }
+      ]
+      tls = {
+        certResolver = "cloudflare"
+      }
+    }
+  })
+
+  depends_on = [helm_release.traefik]
+}
