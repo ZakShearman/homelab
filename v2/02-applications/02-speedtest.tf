@@ -17,15 +17,29 @@ resource "helm_release" "speedtest" {
   # We create it manually above
   create_namespace = false
 
-  wait = true
-  # Chart doesn't properly test install correctly and always fails.
-  atomic  = true
+  wait   = true
+  atomic = true
   timeout = 60 # 1 minute
 
   values = [
     yamlencode({
       service = {
         type = "ClusterIP"
+      }
+
+      securityContext = {
+        # readOnlyRootFilesystem = true
+        # runAsNonRoot           = true
+        # runAsGroup             = 1000
+        # runAsUser              = 1000
+        # privileged             = false
+      }
+
+      resources = {
+        limits = {
+          memory = "128Mi"
+          cpu = "1"
+        }
       }
     })
   ]

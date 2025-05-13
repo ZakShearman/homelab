@@ -22,11 +22,21 @@ resource "helm_release" "longhorn" {
         defaultClassReplicaCount = 1
       }
 
-      defaultBackupStore = {
-        backupTarget = "s3://${data.sops_file.secrets.data["longhorn_backblaze_bucket_name"]}@${data.sops_file.secrets.data["longhorn_backblaze_bucket_region"]}/"
-        backupTargetCredentialSecret = kubernetes_secret.longhorn_backblaze_backups.metadata[0].name
-        pollInternal = "5m"
+      defaultSettings = {
+        backupConcurrentLimit = 10
       }
+
+      defaultBackupStore = {
+        backupTarget = "cifs://${data.sops_file.secrets.data["hetzner_storage_cifs_addr"]}/backup"
+        backupTargetCredentialSecret = kubernetes_secret.longhorn_smb_backups.metadata[0].name
+        pollInterval = "3600" # 1 hour
+      }
+
+      # defaultBackupStore = {
+      #   backupTarget = "s3://${data.sops_file.secrets.data["longhorn_backblaze_bucket_name"]}@${data.sops_file.secrets.data["longhorn_backblaze_bucket_region"]}/"
+      #   backupTargetCredentialSecret = kubernetes_secret.longhorn_backblaze_backups.metadata[0].name
+      #   pollInterval = "43200" # 12 hours
+      # }
     })
   ]
 
@@ -55,8 +65,22 @@ resource "kubernetes_secret" "longhorn_backblaze_backups" {
   depends_on = [var.longhorn_namespace, data.sops_file.secrets]
 }
 
-resource "kubectl_manifest" "backblaze_weekly_backup" {
-  yaml_body = file("files/longhorn-weekly-backup.yaml")
+resource "kubernetes_secret" "longhorn_smb_backups" {
+  metadata {
+    name = "longhorn-smb-creds"
+    namespace = kubernetes_namespace.longhorn.metadata[0].name
+  }
+  
+  type = "Opaque"
+  
+  data = {
+    CIFS_USERNAME = data.sops_file.secrets.data["hetzner_storage_cifs_username"]
+    CIFS_PASSWORD = data.sops_file.secrets.data["hetzner_storage_cifs_password"]
+  }
+}
+
+resource "kubectl_manifest" "backblaze_daily_backup" {
+  yaml_body = file("files/longhorn-daily-backup.yaml")
 
   depends_on = [kubernetes_namespace.longhorn, helm_release.longhorn]
 }
