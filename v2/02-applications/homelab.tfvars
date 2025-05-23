@@ -50,3 +50,6 @@ kubescape_namespace = "kubescape"
 kubescape_chart_version   = "1.27.5"
 
 kube_prometheus_stack_version = "71.1.1"
+
+# plane_namespace = "plane"
+# plane_chart_version = "1.1.1"

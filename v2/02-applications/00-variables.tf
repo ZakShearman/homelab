@@ -151,3 +151,19 @@ variable "kube_prometheus_stack_version" {
 }
 
 ## Monitoring End
+
+## Plane Start
+
+# variable "plane_namespace" {
+#   type = string
+# }
+#
+# variable "plane_chart_version" {
+#   type = string
+# }
+#
+# variable "plane_version" {
+#   type = string
+# }
+
+## Plane End
