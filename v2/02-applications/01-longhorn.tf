@@ -84,3 +84,41 @@ resource "kubectl_manifest" "backblaze_daily_backup" {
 
   depends_on = [kubernetes_namespace.longhorn, helm_release.longhorn]
 }
+
+
+
+resource "kubectl_manifest" "longhorn_ingressroute" {
+  yaml_body = yamlencode({
+    apiVersion = "traefik.io/v1alpha1"
+    kind       = "IngressRoute"
+
+    metadata = {
+      name      = "longhorn"
+      namespace = kubernetes_namespace.longhorn.metadata[0].name
+      annotations = {
+        "app.kubernetes.io/managed-by" = "terraform"
+      }
+    }
+
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`longhorn.shearman.cloud`)"
+          services = [
+            {
+              name = "longhorn-frontend"
+              port = 80
+            }
+          ]
+        }
+      ]
+      tls = {
+        certResolver = "cloudflare"
+      }
+    }
+  })
+
+  depends_on = [helm_release.traefik]
+}
