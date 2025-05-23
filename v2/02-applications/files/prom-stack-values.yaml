@@ -13,9 +13,16 @@ prometheus-node-exporter:
 # Allow PodMonitors and ServiceMonitors to be created in any namespace.
 prometheus:
   prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteMany"]
+          resources:
+            requests:
+              storage: 40Gi
     podMonitorNamespaceSelector:
-      matchLabels: {}
+      matchLabels: { }
     podMonitorSelectorNilUsesHelmValues: false
     serviceMonitorNamespaceSelector:
-      matchLabels: {}
+      matchLabels: { }
     serviceMonitorSelectorNilUsesHelmValues: false
