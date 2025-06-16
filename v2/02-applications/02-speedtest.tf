@@ -38,7 +38,7 @@ resource "helm_release" "speedtest" {
       resources = {
         limits = {
           memory = "128Mi"
-          cpu = "1"
+          cpu    = "1"
         }
       }
     })
@@ -70,6 +70,31 @@ resource "helm_release" "speedtest" {
 #   })
 # }
 
+resource "kubectl_manifest" "speedtest_buffer_middleware" {
+  yaml_body = yamlencode({
+    apiVersion = "traefik.io/v1alpha1"
+    kind       = "Middleware"
+
+    metadata = {
+      name      = "openspeedtest-buffer"
+      namespace = var.openspeedtest_namespace
+      annotations = {
+        "app.kubernetes.io/managed-by" = "terraform"
+      }
+    }
+
+    spec = {
+      buffering = {
+        # OpenSpeedTest recommends 35 MiB for the buffer size
+        maxRequestBodyBytes = 36700160 # 35 MiB
+        maxResponseBodyBytes = 36700160 # 35 MiB
+      }
+    }
+  })
+
+  depends_on = [helm_release.speedtest, kubernetes_namespace.speedtest]
+}
+
 resource "kubectl_manifest" "speedtest_ingressroute" {
   yaml_body = yamlencode({
     apiVersion = "traefik.io/v1alpha1"
@@ -93,7 +118,12 @@ resource "kubectl_manifest" "speedtest_ingressroute" {
             {
               name = "speedtest-openspeedtest"
               port = 3000
-              # namespace = var.openspeedtest_namespace
+            }
+          ]
+          middlewares = [
+            {
+              name      = "openspeedtest-buffer"
+              namespace = kubernetes_namespace.speedtest.metadata[0].name
             }
           ]
         }
@@ -104,5 +134,5 @@ resource "kubectl_manifest" "speedtest_ingressroute" {
     }
   })
 
-  depends_on = [helm_release.traefik]
+  depends_on = [kubernetes_namespace.speedtest, helm_release.traefik, kubectl_manifest.speedtest_buffer_middleware]
 }
