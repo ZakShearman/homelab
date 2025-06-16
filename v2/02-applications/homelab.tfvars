@@ -8,7 +8,7 @@ longhorn_version   = "1.8.1"
 longhorn_s3_endpoint = "https://s3.eu-central-003.backblazeb2.com"
 
 tailscale_operator_namespace     = "tailscale"
-tailscale_operator_chart_version = "1.82.5"
+tailscale_operator_chart_version = "1.84.2"
 
 cnpg_operator_namespace = "cnpg-operator"
 cnpg_operator_version   = "0.23.2"
@@ -34,11 +34,11 @@ cloudflare_tunnel_svcs = [
 ]
 
 immich_namespace     = "immich"
-immich_version       = "v1.132.3"
+immich_version       = "v1.134.0"
 immich_chart_version = "0.9.3"
 
 traefik_namespace = "traefik"
-traefik_version   = "35.2.0"
+traefik_version   = "36.1.0"
 
 openspeedtest_namespace     = "speedtest"
 openspeedtest_chart_version = "0.1.2"

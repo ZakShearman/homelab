@@ -10,9 +10,10 @@ prometheus-node-exporter:
   prometheusSpec:
     scrapeInterval: 10s
 
-# Allow PodMonitors and ServiceMonitors to be created in any namespace.
 prometheus:
   prometheusSpec:
+    retention: 365d
+    retentionSize: 35GB
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -20,6 +21,7 @@ prometheus:
           resources:
             requests:
               storage: 40Gi
+    # Allow PodMonitors and ServiceMonitors to be created in any namespace.
     podMonitorNamespaceSelector:
       matchLabels: { }
     podMonitorSelectorNilUsesHelmValues: false

@@ -38,15 +38,16 @@ resource "kubectl_manifest" "immich_pgql_cluster" {
       "namespace" = var.immich_namespace
     }
     "spec" = {
-      imageName = "ghcr.io/tensorchord/cloudnative-pgvecto.rs:16-v0.3.0"
+      imageName = "ghcr.io/tensorchord/cloudnative-vectorchord:16-0.3.0"
       instances = 1
+      primaryUpdateMethod = "restart" # We can't use switchover since it's a single instance
 
       storage = {
         size = "10Gi"
       }
 
       "postgresql" = {
-        "shared_preload_libraries" = ["vectors.so"]
+        "shared_preload_libraries" = ["vchord.so"]
       }
 
       managed = {
@@ -67,7 +68,7 @@ resource "kubectl_manifest" "immich_pgql_cluster" {
             name = "immich-pg-user"
           }
           postInitSQL = [
-            "CREATE EXTENSION IF NOT EXISTS vectors;",
+            "CREATE EXTENSION IF NOT EXISTS vchord CASCADE;",
             "CREATE EXTENSION IF NOT EXISTS cube CASCADE;",
             "CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;",
           ]
