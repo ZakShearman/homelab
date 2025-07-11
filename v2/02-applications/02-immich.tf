@@ -38,7 +38,7 @@ resource "kubectl_manifest" "immich_pgql_cluster" {
       "namespace" = var.immich_namespace
     }
     "spec" = {
-      imageName = "ghcr.io/tensorchord/cloudnative-vectorchord:16-0.3.0"
+      imageName = "ghcr.io/tensorchord/cloudnative-vectorchord:16-0.4.3"
       instances = 1
       primaryUpdateMethod = "restart" # We can't use switchover since it's a single instance
 

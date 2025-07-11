@@ -24,32 +24,25 @@ cloudflare_tunnel_svcs = [
     service_uri = "http://immich-server.immich.svc.cluster.local:2283"
   },
   {
-    hostname    = "firefly.shearman.cloud"
-    service_uri = "http://firefly-iii.firefly.svc.cluster.local:80"
-  },
-  {
     hostname = "grafana.shearman.cloud"
     service_uri = "http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80"
   }
 ]
 
 immich_namespace     = "immich"
-immich_version       = "v1.134.0"
+immich_version       = "v1.135.3"
 immich_chart_version = "0.9.3"
 
 traefik_namespace = "traefik"
-traefik_version   = "36.1.0"
+traefik_version   = "36.3.0"
 
 openspeedtest_namespace     = "speedtest"
 openspeedtest_chart_version = "0.1.2"
 
-firefly_namespace     = "firefly"
-firefly_chart_version = "0.8.2"
-
 kubescape_namespace = "kubescape"
 kubescape_chart_version   = "1.27.5"
 
-kube_prometheus_stack_version = "71.1.1"
+kube_prometheus_stack_version = "75.9.0"
 
 # plane_namespace = "plane"
 # plane_chart_version = "1.1.1"
