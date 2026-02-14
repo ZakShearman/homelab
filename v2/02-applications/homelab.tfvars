@@ -1,7 +1,7 @@
 cluster_name = "project-a"
 
-kubeconfig_path    = "../01-infra/kubeconfig"
-kubeconfig_context = "admin@project-a"
+kubeconfig_path    = "~/.kube/config"
+kubeconfig_context = "k8s-project-a-1.tailf7a2e5.ts.net"
 
 longhorn_namespace = "longhorn-system"
 longhorn_version   = "1.8.1"
@@ -30,11 +30,11 @@ cloudflare_tunnel_svcs = [
 ]
 
 immich_namespace     = "immich"
-immich_version       = "v1.135.3"
-immich_chart_version = "0.9.3"
+immich_version       = "v2.5.6"
+immich_chart_version = "0.10.3"
 
 traefik_namespace = "traefik"
-traefik_version   = "36.3.0"
+traefik_version   = "39.0.1"
 
 openspeedtest_namespace     = "speedtest"
 openspeedtest_chart_version = "0.1.2"
@@ -42,7 +42,7 @@ openspeedtest_chart_version = "0.1.2"
 kubescape_namespace = "kubescape"
 kubescape_chart_version   = "1.27.5"
 
-kube_prometheus_stack_version = "75.9.0"
+kube_prometheus_stack_version = "81.6.9"
 
 # plane_namespace = "plane"
 # plane_chart_version = "1.1.1"

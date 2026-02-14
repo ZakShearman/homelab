@@ -75,9 +75,23 @@ resource "helm_release" "traefik" {
               permanent = true
             }
           }
+
+          transport = {
+            respondingTimeouts = {
+              readTimeout = "600s" # These must be set as Immich may upload large videos taking more than the default 60s
+              idleTimeout = "600s"
+            }
+          }
         }
         websecure = {
           port = 443
+
+          transport = {
+            respondingTimeouts = {
+              readTimeout = "600s" # These must be set as Immich may upload large videos taking more than the default 60s
+              idleTimeout = "600s"
+            }
+          }
         }
       }
 

@@ -15,7 +15,7 @@ resource "kubernetes_namespace" "immich" {
 
 resource "kubernetes_secret" "immich_pg_user" {
   metadata {
-    name = "immich-pg-user"
+    name      = "immich-pg-user"
     namespace = var.immich_namespace
   }
 
@@ -38,12 +38,12 @@ resource "kubectl_manifest" "immich_pgql_cluster" {
       "namespace" = var.immich_namespace
     }
     "spec" = {
-      imageName = "ghcr.io/tensorchord/cloudnative-vectorchord:16-0.4.3"
+      imageName = "ghcr.io/tensorchord/cloudnative-vectorchord:18.1-1.1.0"
       instances = 1
       primaryUpdateMethod = "restart" # We can't use switchover since it's a single instance
 
       storage = {
-        size = "10Gi"
+        size = "25Gi"
       }
 
       "postgresql" = {
@@ -89,10 +89,10 @@ resource "kubernetes_persistent_volume_claim" "immich" {
   }
 
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "100Gi"
+        storage = "150Gi"
       }
     }
   }
@@ -107,9 +107,6 @@ resource "helm_release" "immich" {
 
   values = [
     yamlencode({
-      image = {
-        tag = var.immich_version
-      }
 
       immich = {
         persistence = {
@@ -119,28 +116,37 @@ resource "helm_release" "immich" {
         }
       }
 
-      redis = {
-        enabled = true
-      }
+      controllers = {
+        main = {
+          containers = {
+            main = {
+              image = {
+                tag = var.immich_version
+              }
 
-      env = {
-        DB_USERNAME = {
-          valueFrom = {
-            secretKeyRef = {
-              name = "immich-pg-user"
-              key = "username"
+              env = {
+                REDIS_HOSTNAME = "immich-redis"
+                DB_USERNAME = {
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "immich-pg-user"
+                      key  = "username"
+                    }
+                  }
+                }
+                DB_PASSWORD = {
+                  valueFrom = {
+                    secretKeyRef = {
+                      name = "immich-pg-user"
+                      key  = "password"
+                    }
+                  }
+                }
+                DB_HOSTNAME = "db-rw.${var.immich_namespace}.svc"
+              }
             }
           }
         }
-        DB_PASSWORD = {
-          valueFrom = {
-            secretKeyRef = {
-              name = "immich-pg-user"
-              key = "password"
-            }
-          }
-        }
-        DB_HOSTNAME = "db-rw.${var.immich_namespace}.svc"
       }
     })
   ]
@@ -150,7 +156,10 @@ resource "helm_release" "immich" {
   atomic = true
   timeout = 120 # 2 minutes
 
-  depends_on = [kubernetes_persistent_volume_claim.immich, kubectl_manifest.immich_pgql_cluster]
+  depends_on = [
+    kubernetes_persistent_volume_claim.immich, kubectl_manifest.immich_pgql_cluster,
+    kubernetes_deployment.immich_redis, kubernetes_service.immich_redis
+  ]
 }
 
 resource "kubectl_manifest" "immich_ingressroute" {
