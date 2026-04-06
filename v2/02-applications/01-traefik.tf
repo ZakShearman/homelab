@@ -93,6 +93,10 @@ resource "helm_release" "traefik" {
             }
           }
         }
+        metrics = {
+          port = 9101
+          hostPort = 9101
+        }
       }
 
       logs = {

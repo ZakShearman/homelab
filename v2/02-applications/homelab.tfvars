@@ -4,11 +4,11 @@ kubeconfig_path    = "~/.kube/config"
 kubeconfig_context = "k8s-project-a-1.tailf7a2e5.ts.net"
 
 longhorn_namespace = "longhorn-system"
-longhorn_version   = "1.8.1"
+longhorn_version   = "1.9.2" # todo needs more updating, but the latest version has a memory leak.... a BAD one
 longhorn_s3_endpoint = "https://s3.eu-central-003.backblazeb2.com"
 
 tailscale_operator_namespace     = "tailscale"
-tailscale_operator_chart_version = "1.84.2"
+tailscale_operator_chart_version = "1.94.2"
 
 cnpg_operator_namespace = "cnpg-operator"
 cnpg_operator_version   = "0.23.2"
@@ -30,11 +30,11 @@ cloudflare_tunnel_svcs = [
 ]
 
 immich_namespace     = "immich"
-immich_version       = "v2.5.6"
-immich_chart_version = "0.10.3"
+immich_version       = "v2.6.3"
+immich_chart_version = "0.11.1"
 
 traefik_namespace = "traefik"
-traefik_version   = "39.0.1"
+traefik_version   = "37.4.0"
 
 openspeedtest_namespace     = "speedtest"
 openspeedtest_chart_version = "0.1.2"
