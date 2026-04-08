@@ -6,8 +6,8 @@ resource "kubernetes_namespace" "traefik" {
   metadata {
     name = var.traefik_namespace
     labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
-      "pod-security.kubernetes.io/enforce": "privileged"
+      "app.kubernetes.io/managed-by"       = "terraform"
+      "pod-security.kubernetes.io/enforce" = "privileged"
     }
   }
 }
@@ -34,7 +34,7 @@ resource "helm_release" "traefik" {
   repository = "https://traefik.github.io/charts"
   chart      = "traefik"
   namespace  = var.traefik_namespace
-  version = var.traefik_version
+  version    = var.traefik_version
 
   # We create it manually above
   create_namespace = false
@@ -45,9 +45,9 @@ resource "helm_release" "traefik" {
 
   values = [
     yamlencode({
-      entryPoints = {
+      ports = {
         web = {
-          # address = ":80"
+          port = 80
 
           http = {
             redirections = {
@@ -57,44 +57,31 @@ resource "helm_release" "traefik" {
                 permanent = true
               }
             }
-          }
-        }
 
-        # webSecure = {
-        #   address = ":443"
-        # }
-      }
-
-      ports = {
-        web = {
-          port = 80
-          redirect = {
-            entryPoint = {
-              to        = "websecure"
-              scheme    = "https"
-              permanent = true
-            }
-          }
-
-          transport = {
-            respondingTimeouts = {
-              readTimeout = "600s" # These must be set as Immich may upload large videos taking more than the default 60s
-              idleTimeout = "600s"
+            transport = {
+              respondingTimeouts = {
+                readTimeout = "600s" # These must be set as Immich may upload large videos taking more than the default 60s
+                idleTimeout = "600s"
+              }
             }
           }
         }
+
         websecure = {
           port = 443
 
-          transport = {
-            respondingTimeouts = {
-              readTimeout = "600s" # These must be set as Immich may upload large videos taking more than the default 60s
-              idleTimeout = "600s"
+          http = {
+            transport = {
+              respondingTimeouts = {
+                readTimeout = "600s" # These must be set as Immich may upload large videos taking more than the default 60s
+                idleTimeout = "600s"
+              }
             }
           }
         }
+
         metrics = {
-          port = 9101
+          port     = 9101
           hostPort = 9101
         }
       }
@@ -106,10 +93,6 @@ resource "helm_release" "traefik" {
       }
 
       hostNetwork = true
-      containers = [{
-        name = "traefik"
-      }]
-
       service = {
         enabled = false
       }
@@ -134,7 +117,7 @@ resource "helm_release" "traefik" {
 
         capabilities = {
           drop = ["ALL"]
-          add = ["NET_BIND_SERVICE"]
+          add  = ["NET_BIND_SERVICE"]
         }
       }
 

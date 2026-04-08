@@ -3,8 +3,8 @@ cluster_name = "project-a"
 kubeconfig_path    = "~/.kube/config"
 kubeconfig_context = "k8s-project-a-1.tailf7a2e5.ts.net"
 
-longhorn_namespace = "longhorn-system"
-longhorn_version   = "1.9.2" # todo needs more updating, but the latest version has a memory leak.... a BAD one
+longhorn_namespace   = "longhorn-system"
+longhorn_version     = "1.9.2" # todo needs more updating, but the latest version has a memory leak.... a BAD one
 longhorn_s3_endpoint = "https://s3.eu-central-003.backblazeb2.com"
 
 tailscale_operator_namespace     = "tailscale"
@@ -13,10 +13,10 @@ tailscale_operator_chart_version = "1.94.2"
 cnpg_operator_namespace = "cnpg-operator"
 cnpg_operator_version   = "0.23.2"
 
-cloudflared_namespace  = "cloudflared"
-cloudflared_version    = "2025.4.2"
+cloudflared_namespace          = "cloudflared"
+cloudflared_version            = "2025.4.2"
 cloudflared_helm_chart_version = "0.3.2" # https://github.com/cloudflare/helm-charts/blob/main/charts/cloudflare-tunnel/Chart.yaml
-cloudflare_tunnel_name = "k8s-project-a"
+cloudflare_tunnel_name         = "k8s-project-a"
 
 cloudflare_tunnel_svcs = [
   {
@@ -24,7 +24,7 @@ cloudflare_tunnel_svcs = [
     service_uri = "http://immich-server.immich.svc.cluster.local:2283"
   },
   {
-    hostname = "grafana.shearman.cloud"
+    hostname    = "grafana.shearman.cloud"
     service_uri = "http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80"
   }
 ]
@@ -34,13 +34,13 @@ immich_version       = "v2.6.3"
 immich_chart_version = "0.11.1"
 
 traefik_namespace = "traefik"
-traefik_version   = "37.4.0"
+traefik_version   = "39.0.7"
 
 openspeedtest_namespace     = "speedtest"
 openspeedtest_chart_version = "0.1.2"
 
-kubescape_namespace = "kubescape"
-kubescape_chart_version   = "1.27.5"
+kubescape_namespace     = "kubescape"
+kubescape_chart_version = "1.27.5"
 
 kube_prometheus_stack_version = "81.6.9"
 
