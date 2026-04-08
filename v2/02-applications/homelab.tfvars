@@ -26,6 +26,10 @@ cloudflare_tunnel_svcs = [
   {
     hostname    = "grafana.shearman.cloud"
     service_uri = "http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80"
+  },
+  {
+    hostname = "trek.shearman.cloud"
+    service_uri = "http://trek.trek.svc.cluster.local:3000"
   }
 ]
 
