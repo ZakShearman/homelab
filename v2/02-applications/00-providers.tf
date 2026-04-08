@@ -9,7 +9,7 @@ terraform {
       version = "2.36.0"
     }
     kubectl = {
-      source = "gavinbunney/kubectl"
+      source  = "gavinbunney/kubectl"
       version = "1.19.0"
     }
     sops = {
@@ -26,12 +26,12 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes {
-    config_path = var.kubeconfig_path
-    config_context         = var.kubeconfig_context
+    config_path    = var.kubeconfig_path
+    config_context = var.kubeconfig_context
   }
 }
 
 provider "kubectl" {
-  config_path = var.kubeconfig_path
+  config_path    = var.kubeconfig_path
   config_context = var.kubeconfig_context
 }

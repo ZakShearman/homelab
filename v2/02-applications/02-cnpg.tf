@@ -12,7 +12,7 @@ resource "helm_release" "cnpg" {
   repository = "https://cloudnative-pg.github.io/charts"
   chart      = "cloudnative-pg"
   namespace  = var.cnpg_operator_namespace
-  version = var.cnpg_operator_version
+  version    = var.cnpg_operator_version
 
   # We create it manually above
   create_namespace = false

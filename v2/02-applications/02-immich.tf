@@ -38,8 +38,8 @@ resource "kubectl_manifest" "immich_pgql_cluster" {
       "namespace" = var.immich_namespace
     }
     "spec" = {
-      imageName = "ghcr.io/tensorchord/cloudnative-vectorchord:18.1-1.1.0"
-      instances = 1
+      imageName           = "ghcr.io/tensorchord/cloudnative-vectorchord:18.1-1.1.0"
+      instances           = 1
       primaryUpdateMethod = "restart" # We can't use switchover since it's a single instance
 
       storage = {
@@ -153,7 +153,7 @@ resource "helm_release" "immich" {
 
   wait = true
   # If the install fails, automatically roll back
-  atomic = true
+  atomic  = true
   timeout = 120 # 2 minutes
 
   depends_on = [

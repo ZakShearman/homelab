@@ -12,7 +12,7 @@ resource "helm_release" "tailscale_operator" {
   repository = "https://pkgs.tailscale.com/helmcharts"
   chart      = "tailscale-operator"
   namespace  = var.tailscale_operator_namespace
-  version = var.tailscale_operator_chart_version
+  version    = var.tailscale_operator_chart_version
 
   # We create it manually above
   create_namespace = false
@@ -28,8 +28,8 @@ resource "helm_release" "tailscale_operator" {
   }
 
   set {
-    name = "apiServerProxyConfig.mode"
-    type = "string"
+    name  = "apiServerProxyConfig.mode"
+    type  = "string"
     value = "true"
   }
 

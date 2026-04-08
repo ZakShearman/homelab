@@ -12,13 +12,13 @@ resource "helm_release" "speedtest" {
   repository = "https://openspeedtest.github.io/Helm-chart/"
   chart      = "openspeedtest"
   namespace  = var.openspeedtest_namespace
-  version = var.openspeedtest_chart_version
+  version    = var.openspeedtest_chart_version
 
   # We create it manually above
   create_namespace = false
 
-  wait   = true
-  atomic = true
+  wait    = true
+  atomic  = true
   timeout = 60 # 1 minute
 
   values = [
@@ -86,7 +86,7 @@ resource "kubectl_manifest" "speedtest_buffer_middleware" {
     spec = {
       buffering = {
         # OpenSpeedTest recommends 35 MiB for the buffer size
-        maxRequestBodyBytes = 36700160 # 35 MiB
+        maxRequestBodyBytes  = 36700160 # 35 MiB
         maxResponseBodyBytes = 36700160 # 35 MiB
       }
     }

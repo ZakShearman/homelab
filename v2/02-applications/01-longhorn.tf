@@ -2,7 +2,7 @@ resource "kubernetes_namespace" "longhorn" {
   metadata {
     name = var.longhorn_namespace
     labels = {
-      "app.kubernetes.io/managed-by" = "terraform"
+      "app.kubernetes.io/managed-by"       = "terraform"
       "pod-security.kubernetes.io/enforce" = "privileged"
     }
   }
@@ -27,9 +27,9 @@ resource "helm_release" "longhorn" {
       }
 
       defaultBackupStore = {
-        backupTarget = "cifs://${data.sops_file.secrets.data["hetzner_storage_cifs_addr"]}/backup"
+        backupTarget                 = "cifs://${data.sops_file.secrets.data["hetzner_storage_cifs_addr"]}/backup"
         backupTargetCredentialSecret = kubernetes_secret.longhorn_smb_backups.metadata[0].name
-        pollInterval = "3600" # 1 hour
+        pollInterval                 = "3600" # 1 hour
       }
 
       # defaultBackupStore = {
@@ -42,7 +42,7 @@ resource "helm_release" "longhorn" {
 
   wait = true
   # If the install fails, automatically roll back
-  atomic = true
+  atomic  = true
   timeout = 180 # 3 minutes
 
   depends_on = [kubernetes_namespace.longhorn, kubernetes_secret.longhorn_backblaze_backups]
@@ -67,12 +67,12 @@ resource "kubernetes_secret" "longhorn_backblaze_backups" {
 
 resource "kubernetes_secret" "longhorn_smb_backups" {
   metadata {
-    name = "longhorn-smb-creds"
+    name      = "longhorn-smb-creds"
     namespace = kubernetes_namespace.longhorn.metadata[0].name
   }
-  
+
   type = "Opaque"
-  
+
   data = {
     CIFS_USERNAME = data.sops_file.secrets.data["hetzner_storage_cifs_username"]
     CIFS_PASSWORD = data.sops_file.secrets.data["hetzner_storage_cifs_password"]

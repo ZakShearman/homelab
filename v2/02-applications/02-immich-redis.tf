@@ -39,10 +39,10 @@ resource "kubernetes_deployment" "immich_redis" {
 
       spec {
         security_context {
-          fs_group            = 999
+          fs_group               = 999
           fs_group_change_policy = "OnRootMismatch"
-          run_as_user        = 999
-          run_as_non_root    = true
+          run_as_user            = 999
+          run_as_non_root        = true
         }
 
         container {
