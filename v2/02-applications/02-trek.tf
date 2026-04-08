@@ -91,7 +91,7 @@ resource "kubernetes_deployment" "trek" {
           }
           env {
             name  = "TRUST_PROXY"
-            value = "1"
+            value = "2"
           }
           env {
             name  = "APP_URL"
@@ -118,8 +118,9 @@ resource "kubernetes_deployment" "trek" {
 
           liveness_probe {
             http_get {
-              path = "/api/health"
-              port = 3000
+              scheme = "HTTP"
+              path   = "/api/health"
+              port   = 3000
             }
             initial_delay_seconds = 15
             period_seconds        = 30
@@ -134,6 +135,7 @@ resource "kubernetes_deployment" "trek" {
             }
             limits = {
               memory = "512Mi"
+              cpu    = "500m"
             }
           }
         }
@@ -255,6 +257,8 @@ resource "kubernetes_secret" "trek_oidc_cf_env" {
     OIDC_ISSUER        = data.sops_file.secrets.data["trek_cf_oidc_issuer"]
     OIDC_CLIENT_ID     = data.sops_file.secrets.data["trek_cf_oidc_client_id"]
     OIDC_CLIENT_SECRET = data.sops_file.secrets.data["trek_cf_oidc_client_secret"]
+    OIDC_ADMIN_VALUE   = data.sops_file.secrets.data["trek_cf_oidc_admin_value"]
+    OIDC_ADMIN_CLAIM   = "email"
     OIDC_ONLY          = "true"
   }
 
