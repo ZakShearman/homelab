@@ -43,6 +43,7 @@ resource "kubernetes_deployment" "trek" {
           image = "mauriceboe/trek:latest"
 
           port {
+            name           = "http"
             container_port = 3000
           }
 
@@ -95,6 +96,11 @@ resource "kubernetes_deployment" "trek" {
           env {
             name  = "APP_URL"
             value = "https://trek.shearman.cloud"
+          }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.trek_oidc_cf_env.metadata[0].name
+            }
           }
 
           volume_mount {
@@ -155,12 +161,38 @@ resource "kubernetes_deployment" "trek" {
     }
   }
 
+  timeouts {
+    create = "120s"
+    update = "60s"
+  }
+
   depends_on = [
     kubernetes_persistent_volume_claim.trek_data,
     kubernetes_persistent_volume_claim.trek_uploads,
     kubernetes_secret.trek_encryption_key
   ]
 }
+
+resource "kubernetes_service" "trek" {
+  metadata {
+    name      = "trek"
+    namespace = kubernetes_namespace.trek.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "trek"
+    }
+
+    port {
+      port        = 3000
+      target_port = 3000
+    }
+
+    type = "ClusterIP"
+  }
+}
+
 
 resource "kubernetes_persistent_volume_claim" "trek_data" {
   metadata {
@@ -208,6 +240,22 @@ resource "kubernetes_secret" "trek_encryption_key" {
 
   data = {
     ENCRYPTION_KEY = random_bytes.encryption_key.hex
+  }
+
+  depends_on = [random_bytes.encryption_key]
+}
+
+resource "kubernetes_secret" "trek_oidc_cf_env" {
+  metadata {
+    name      = "trek-oidc-cf-env"
+    namespace = kubernetes_namespace.trek.metadata[0].name
+  }
+
+  data = {
+    OIDC_ISSUER        = data.sops_file.secrets.data["trek_cf_oidc_issuer"]
+    OIDC_CLIENT_ID     = data.sops_file.secrets.data["trek_cf_oidc_client_id"]
+    OIDC_CLIENT_SECRET = data.sops_file.secrets.data["trek_cf_oidc_client_secret"]
+    OIDC_ONLY          = "true"
   }
 
   depends_on = [random_bytes.encryption_key]
