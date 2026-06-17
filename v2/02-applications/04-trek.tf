@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "trek" {
+resource "kubernetes_namespace_v1" "trek" {
   metadata {
     name = "trek"
     labels = {
@@ -7,10 +7,10 @@ resource "kubernetes_namespace" "trek" {
   }
 }
 
-resource "kubernetes_deployment" "trek" {
+resource "kubernetes_deployment_v1" "trek" {
   metadata {
     name      = "trek"
-    namespace = kubernetes_namespace.trek.metadata[0].name
+    namespace = kubernetes_namespace_v1.trek.metadata[0].name
   }
 
   spec {
@@ -40,7 +40,7 @@ resource "kubernetes_deployment" "trek" {
 
         container {
           name  = "trek"
-          image = "mauriceboe/trek:latest"
+          image = "mauriceboe/trek:3.1.0"
 
           port {
             name           = "http"
@@ -68,7 +68,7 @@ resource "kubernetes_deployment" "trek" {
             name = "ENCRYPTION_KEY"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.trek_encryption_key.metadata[0].name
+                name = kubernetes_secret_v1.trek_encryption_key.metadata[0].name
                 key  = "ENCRYPTION_KEY"
               }
             }
@@ -99,7 +99,7 @@ resource "kubernetes_deployment" "trek" {
           }
           env_from {
             secret_ref {
-              name = kubernetes_secret.trek_oidc_cf_env.metadata[0].name
+              name = kubernetes_secret_v1.trek_oidc_cf_env.metadata[0].name
             }
           }
 
@@ -143,13 +143,13 @@ resource "kubernetes_deployment" "trek" {
         volume {
           name = "data"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.trek_data.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim_v1.trek_data.metadata[0].name
           }
         }
         volume {
           name = "uploads"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.trek_uploads.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim_v1.trek_uploads.metadata[0].name
           }
         }
         volume {
@@ -169,16 +169,16 @@ resource "kubernetes_deployment" "trek" {
   }
 
   depends_on = [
-    kubernetes_persistent_volume_claim.trek_data,
-    kubernetes_persistent_volume_claim.trek_uploads,
-    kubernetes_secret.trek_encryption_key
+    kubernetes_persistent_volume_claim_v1.trek_data,
+    kubernetes_persistent_volume_claim_v1.trek_uploads,
+    kubernetes_secret_v1.trek_encryption_key
   ]
 }
 
-resource "kubernetes_service" "trek" {
+resource "kubernetes_service_v1" "trek" {
   metadata {
     name      = "trek"
-    namespace = kubernetes_namespace.trek.metadata[0].name
+    namespace = kubernetes_namespace_v1.trek.metadata[0].name
   }
 
   spec {
@@ -196,10 +196,10 @@ resource "kubernetes_service" "trek" {
 }
 
 
-resource "kubernetes_persistent_volume_claim" "trek_data" {
+resource "kubernetes_persistent_volume_claim_v1" "trek_data" {
   metadata {
     name      = "trek-data"
-    namespace = kubernetes_namespace.trek.metadata[0].name
+    namespace = kubernetes_namespace_v1.trek.metadata[0].name
   }
 
   spec {
@@ -213,10 +213,10 @@ resource "kubernetes_persistent_volume_claim" "trek_data" {
   }
 }
 
-resource "kubernetes_persistent_volume_claim" "trek_uploads" {
+resource "kubernetes_persistent_volume_claim_v1" "trek_uploads" {
   metadata {
     name      = "trek-uploads"
-    namespace = kubernetes_namespace.trek.metadata[0].name
+    namespace = kubernetes_namespace_v1.trek.metadata[0].name
   }
 
   spec {
@@ -234,10 +234,10 @@ resource "random_bytes" "encryption_key" {
   length = 32
 }
 
-resource "kubernetes_secret" "trek_encryption_key" {
+resource "kubernetes_secret_v1" "trek_encryption_key" {
   metadata {
     name      = "trek-encryption-key"
-    namespace = kubernetes_namespace.trek.metadata[0].name
+    namespace = kubernetes_namespace_v1.trek.metadata[0].name
   }
 
   data = {
@@ -247,10 +247,10 @@ resource "kubernetes_secret" "trek_encryption_key" {
   depends_on = [random_bytes.encryption_key]
 }
 
-resource "kubernetes_secret" "trek_oidc_cf_env" {
+resource "kubernetes_secret_v1" "trek_oidc_cf_env" {
   metadata {
     name      = "trek-oidc-cf-env"
-    namespace = kubernetes_namespace.trek.metadata[0].name
+    namespace = kubernetes_namespace_v1.trek.metadata[0].name
   }
 
   data = {

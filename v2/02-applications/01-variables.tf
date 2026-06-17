@@ -13,25 +13,13 @@ variable "kubeconfig_context" {
 
 ## Longhorn Start
 
-variable "longhorn_namespace" {
-  type = string
-}
-
 variable "longhorn_version" {
-  type = string
-}
-
-variable "longhorn_s3_endpoint" {
   type = string
 }
 
 ## Longhorn End
 
 ## Tailscale Start
-
-variable "tailscale_operator_namespace" {
-  type = string
-}
 
 variable "tailscale_operator_chart_version" {
   type        = string
@@ -41,10 +29,6 @@ variable "tailscale_operator_chart_version" {
 ## Tailscale End
 
 ## Cloud Native PostgreSQL Start
-
-variable "cnpg_operator_namespace" {
-  type = string
-}
 
 variable "cnpg_operator_version" {
   type = string
@@ -59,10 +43,6 @@ variable "cloudflared_version" {
 }
 
 variable "cloudflared_helm_chart_version" {
-  type = string
-}
-
-variable "cloudflared_namespace" {
   type = string
 }
 
@@ -82,10 +62,6 @@ variable "cloudflare_tunnel_svcs" {
 
 ## Immich Start
 
-variable "immich_namespace" {
-  type = string
-}
-
 variable "immich_chart_version" {
   type = string
 }
@@ -98,10 +74,6 @@ variable "immich_version" {
 
 ## Traefik Start
 
-variable "traefik_namespace" {
-  type = string
-}
-
 variable "traefik_version" {
   type = string
 }
@@ -110,10 +82,6 @@ variable "traefik_version" {
 
 ## Speed Test Start
 
-variable "openspeedtest_namespace" {
-  type = string
-}
-
 variable "openspeedtest_chart_version" {
   type = string
 }
@@ -121,10 +89,6 @@ variable "openspeedtest_chart_version" {
 ## Speed Test End
 
 ## Kubescape Start
-
-variable "kubescape_namespace" {
-  type = string
-}
 
 variable "kubescape_chart_version" {
   type = string

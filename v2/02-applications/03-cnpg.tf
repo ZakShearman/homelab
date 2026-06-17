@@ -1,6 +1,6 @@
-resource "kubernetes_namespace" "cnpg" {
+resource "kubernetes_namespace_v1" "cnpg" {
   metadata {
-    name = var.cnpg_operator_namespace
+    name = "cnpg-operator"
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
     }
@@ -11,7 +11,7 @@ resource "helm_release" "cnpg" {
   name       = "cnpg-operator"
   repository = "https://cloudnative-pg.github.io/charts"
   chart      = "cloudnative-pg"
-  namespace  = var.cnpg_operator_namespace
+  namespace  = kubernetes_namespace_v1.cnpg.metadata[0].name
   version    = var.cnpg_operator_version
 
   # We create it manually above
@@ -22,5 +22,5 @@ resource "helm_release" "cnpg" {
   atomic  = true
   timeout = 60 # 1 minute
 
-  depends_on = [helm_release.longhorn, kubernetes_namespace.cnpg]
+  depends_on = [helm_release.longhorn, kubernetes_namespace_v1.cnpg]
 }

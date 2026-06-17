@@ -1,6 +1,6 @@
-resource "kubernetes_namespace" "speedtest" {
+resource "kubernetes_namespace_v1" "speedtest" {
   metadata {
-    name = var.openspeedtest_namespace
+    name = "speedtest"
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
     }
@@ -11,7 +11,7 @@ resource "helm_release" "speedtest" {
   name       = "speedtest"
   repository = "https://openspeedtest.github.io/Helm-chart/"
   chart      = "openspeedtest"
-  namespace  = var.openspeedtest_namespace
+  namespace  = kubernetes_namespace_v1.speedtest.metadata[0].name
   version    = var.openspeedtest_chart_version
 
   # We create it manually above
@@ -44,7 +44,7 @@ resource "helm_release" "speedtest" {
     })
   ]
 
-  depends_on = [kubernetes_namespace.speedtest]
+  depends_on = [kubernetes_namespace_v1.speedtest]
 }
 
 # resource "kubectl_manifest" "speedtest_middleware_https_redirect" {
@@ -77,7 +77,7 @@ resource "kubectl_manifest" "speedtest_buffer_middleware" {
 
     metadata = {
       name      = "openspeedtest-buffer"
-      namespace = var.openspeedtest_namespace
+      namespace = kubernetes_namespace_v1.speedtest.metadata[0].name
       annotations = {
         "app.kubernetes.io/managed-by" = "terraform"
       }
@@ -92,7 +92,7 @@ resource "kubectl_manifest" "speedtest_buffer_middleware" {
     }
   })
 
-  depends_on = [helm_release.speedtest, kubernetes_namespace.speedtest]
+  depends_on = [helm_release.speedtest, kubernetes_namespace_v1.speedtest, helm_release.traefik]
 }
 
 resource "kubectl_manifest" "speedtest_ingressroute" {
@@ -102,7 +102,7 @@ resource "kubectl_manifest" "speedtest_ingressroute" {
 
     metadata = {
       name      = "openspeedtest"
-      namespace = var.openspeedtest_namespace
+      namespace = kubernetes_namespace_v1.speedtest.metadata[0].name
       annotations = {
         "app.kubernetes.io/managed-by" = "terraform"
       }
@@ -123,7 +123,7 @@ resource "kubectl_manifest" "speedtest_ingressroute" {
           middlewares = [
             {
               name      = "openspeedtest-buffer"
-              namespace = kubernetes_namespace.speedtest.metadata[0].name
+              namespace = kubernetes_namespace_v1.speedtest.metadata[0].name
             }
           ]
         }
@@ -134,5 +134,5 @@ resource "kubectl_manifest" "speedtest_ingressroute" {
     }
   })
 
-  depends_on = [kubernetes_namespace.speedtest, helm_release.traefik, kubectl_manifest.speedtest_buffer_middleware]
+  depends_on = [kubernetes_namespace_v1.speedtest, helm_release.traefik, kubectl_manifest.speedtest_buffer_middleware]
 }

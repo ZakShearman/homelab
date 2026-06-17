@@ -1,0 +1,89 @@
+kubeProxyReplacement: true
+
+ipam:
+  mode: kubernetes
+
+routingMode: native
+#autoDirectNodeRoutes: true
+ipv4NativeRoutingCIDR: 10.42.0.0/16
+MTU: 1500
+devices: "enp6s0"
+
+bpf:
+  masquerade: true
+
+encryption:
+  enabled: true
+  type: wireguard
+  nodeEncryption: true
+
+k8sServiceHost: "100.65.1.1" # tailscale IP of the controlplane (single CP rn)
+k8sServicePort: "6443"
+
+#ingressController:
+#  enabled: true
+
+gatewayAPI:
+  enabled: true
+
+enableCriticalPriorityClass: true
+
+operator:
+  replicas: 1
+  prometheus:
+    enabled: true
+#    serviceMonitor:
+#      enabled: true
+
+# todo technically a problem right now for deploying a new cluster, since
+# it depends on kube-prometheus-stack being deployed, which we tell it to depend on Cilium. lol.
+# could technically not depend, we've just treated the CNI as a 'primary dependency'.
+# This goes for any other serviceMonitor.enabled=true we have.
+prometheus:
+  enabled: true
+#  serviceMonitor:
+#    enabled: true
+  metrics:
+    - "+cilium_bpf_map_pressure"
+    - "+cilium_bpf_map_ops_total"
+
+envoy:
+  enabled: true
+  prometheus:
+    enabled: true
+#    serviceMonitor:
+#      enabled: true
+
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  metrics:
+    enableOpenMetrics: true
+    enabled:
+      - "dns"
+      - "drop"
+      - "tcp"
+      - "flow"
+      - "port-distribution"
+      - "icmp"
+      - "httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction"
+#    serviceMonitor:
+#      enabled: true
+#    dashboards:
+#      enabled: true
+#      namespace: monitoring # todo yet again, this is depending on the prometheus stack being deployed first.
+#      annotations:
+#        grafana_folder: Cilium
+
+# Optional: ships the cilium-agent + operator Grafana dashboards too
+#dashboards:
+#  enabled: true
+#  namespace: monitoring
+#  annotations:
+#    grafana_folder: "Cilium"
+
+hostFirewall:
+  enabled: false

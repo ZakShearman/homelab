@@ -1,6 +1,6 @@
-resource "kubernetes_namespace" "tailscale" {
+resource "kubernetes_namespace_v1" "tailscale" {
   metadata {
-    name = var.tailscale_operator_namespace
+    name = "tailscale"
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
     }
@@ -11,7 +11,7 @@ resource "helm_release" "tailscale_operator" {
   name       = "tailscale-operator"
   repository = "https://pkgs.tailscale.com/helmcharts"
   chart      = "tailscale-operator"
-  namespace  = var.tailscale_operator_namespace
+  namespace  = kubernetes_namespace_v1.tailscale.metadata[0].name
   version    = var.tailscale_operator_chart_version
 
   # We create it manually above
@@ -22,16 +22,16 @@ resource "helm_release" "tailscale_operator" {
   atomic  = true
   timeout = 60 # 1 minute
 
-  set {
-    name  = "operatorConfig.hostname"
-    value = "k8s-${var.cluster_name}"
-  }
-
-  set {
-    name  = "apiServerProxyConfig.mode"
-    type  = "string"
-    value = "true"
-  }
+  values = [
+    yamlencode({
+      operatorConfig = {
+        hostname = "k8s-${var.cluster_name}"
+      }
+      apiServerProxyConfig = {
+        mode = "true"
+      }
+    })
+  ]
 
   set_sensitive {
     name  = "oauth.clientId"
@@ -43,5 +43,5 @@ resource "helm_release" "tailscale_operator" {
     value = data.sops_file.secrets.data["tailscale_operator_client_secret"]
   }
 
-  depends_on = [kubernetes_namespace.tailscale, data.sops_file.secrets]
+  depends_on = [kubernetes_namespace_v1.tailscale, data.sops_file.secrets]
 }

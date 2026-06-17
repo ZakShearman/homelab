@@ -1,10 +1,6 @@
-locals {
-  immich_pvc_name = "immich-pvc"
-}
-
-resource "kubernetes_namespace" "immich" {
+resource "kubernetes_namespace_v1" "immich" {
   metadata {
-    name = var.immich_namespace
+    name = "immich"
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
     }
@@ -13,10 +9,10 @@ resource "kubernetes_namespace" "immich" {
   depends_on = [helm_release.longhorn]
 }
 
-resource "kubernetes_secret" "immich_pg_user" {
+resource "kubernetes_secret_v1" "immich_pg_user" {
   metadata {
     name      = "immich-pg-user"
-    namespace = var.immich_namespace
+    namespace = kubernetes_namespace_v1.immich.metadata[0].name
   }
 
   type = "opaque"
@@ -26,16 +22,16 @@ resource "kubernetes_secret" "immich_pg_user" {
     password = data.sops_file.secrets.data["immich_default_password"]
   }
 
-  depends_on = [var.immich_namespace, data.sops_file.secrets]
+  depends_on = [kubernetes_namespace_v1.immich, data.sops_file.secrets]
 }
 
-resource "kubectl_manifest" "immich_pgql_cluster" {
+resource "kubectl_manifest" "immich_postgres_cluster" {
   yaml_body = yamlencode({
     "apiVersion" = "postgresql.cnpg.io/v1"
     "kind"       = "Cluster"
     "metadata" = {
       "name"      = "db"
-      "namespace" = var.immich_namespace
+      "namespace" = kubernetes_namespace_v1.immich.metadata[0].name
     }
     "spec" = {
       imageName           = "ghcr.io/tensorchord/cloudnative-vectorchord:18.1-1.1.0"
@@ -61,31 +57,33 @@ resource "kubectl_manifest" "immich_pgql_cluster" {
       }
 
       bootstrap = {
-        initdb = {
+        recovery = {
           database = "immich"
           owner    = "immich"
           secret = {
             name = "immich-pg-user"
           }
-          postInitSQL = [
-            "CREATE EXTENSION IF NOT EXISTS vchord CASCADE;",
-            "CREATE EXTENSION IF NOT EXISTS cube CASCADE;",
-            "CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;",
-          ]
+          volumeSnapshots = {
+            storage = {
+              name     = "old-db-1"
+              kind     = "PersistentVolumeClaim"
+              apiGroup = ""
+            }
+          }
         }
       }
     }
   })
 
-  depends_on = [var.immich_namespace, helm_release.cnpg, kubernetes_secret.immich_pg_user]
+  depends_on = [kubernetes_namespace_v1.immich, helm_release.cnpg, kubernetes_secret_v1.immich_pg_user]
 }
 
-resource "kubernetes_persistent_volume_claim" "immich" {
-  depends_on = [kubernetes_namespace.immich]
+resource "kubernetes_persistent_volume_claim_v1" "immich" {
+  depends_on = [kubernetes_namespace_v1.immich]
 
   metadata {
-    name      = local.immich_pvc_name
-    namespace = var.immich_namespace
+    name      = "immich-pvc"
+    namespace = kubernetes_namespace_v1.immich.metadata[0].name
   }
 
   spec {
@@ -102,7 +100,7 @@ resource "helm_release" "immich" {
   name       = "immich"
   repository = "oci://ghcr.io/immich-app/immich-charts/"
   chart      = "immich"
-  namespace  = var.immich_namespace
+  namespace  = kubernetes_namespace_v1.immich.metadata[0].name
   version    = var.immich_chart_version
 
   values = [
@@ -111,7 +109,7 @@ resource "helm_release" "immich" {
       immich = {
         persistence = {
           library = {
-            existingClaim = local.immich_pvc_name
+            existingClaim = kubernetes_persistent_volume_claim_v1.immich.metadata[0].name
           }
         }
       }
@@ -142,7 +140,7 @@ resource "helm_release" "immich" {
                     }
                   }
                 }
-                DB_HOSTNAME = "db-rw.${var.immich_namespace}.svc"
+                DB_HOSTNAME = "db-rw.${kubernetes_namespace_v1.immich.metadata[0].name}.svc"
               }
             }
           }
@@ -157,8 +155,8 @@ resource "helm_release" "immich" {
   timeout = 120 # 2 minutes
 
   depends_on = [
-    kubernetes_persistent_volume_claim.immich, kubectl_manifest.immich_pgql_cluster,
-    kubernetes_deployment.immich_redis, kubernetes_service.immich_redis
+    kubernetes_persistent_volume_claim_v1.immich, kubectl_manifest.immich_postgres_cluster,
+    kubernetes_deployment_v1.immich_redis, kubernetes_service_v1.immich_redis
   ]
 }
 
@@ -169,7 +167,7 @@ resource "kubectl_manifest" "immich_ingressroute" {
 
     metadata = {
       name      = "immich"
-      namespace = kubernetes_namespace.immich.metadata[0].name
+      namespace = kubernetes_namespace_v1.immich.metadata[0].name
       annotations = {
         "app.kubernetes.io/managed-by" = "terraform"
       }

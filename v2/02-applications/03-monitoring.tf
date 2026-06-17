@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "monitoring" {
+resource "kubernetes_namespace_v1" "monitoring" {
   metadata {
     name = "monitoring"
     labels = {
@@ -7,10 +7,10 @@ resource "kubernetes_namespace" "monitoring" {
   }
 }
 
-resource "kubernetes_config_map" "grafana_cloudflare_auth" {
+resource "kubernetes_config_map_v1" "grafana_cloudflare_auth" {
   metadata {
     name      = "grafana-cloudflare-auth"
-    namespace = kubernetes_namespace.monitoring.metadata[0].name
+    namespace = kubernetes_namespace_v1.monitoring.metadata[0].name
   }
 
   data = {
@@ -20,14 +20,14 @@ resource "kubernetes_config_map" "grafana_cloudflare_auth" {
     GF_USERS_AUTO_ASSIGN_ORG_ROLE = "Admin"
   }
 
-  depends_on = [kubernetes_namespace.monitoring]
+  depends_on = [kubernetes_namespace_v1.monitoring]
 }
 
 resource "helm_release" "kube_prometheus_stack" {
   name       = "kube-prometheus-stack"
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
-  namespace  = kubernetes_namespace.monitoring.metadata[0].name
+  namespace  = kubernetes_namespace_v1.monitoring.metadata[0].name
   version    = var.kube_prometheus_stack_version
 
   # We create it manually above
@@ -40,5 +40,5 @@ resource "helm_release" "kube_prometheus_stack" {
   atomic  = false
   timeout = 120 # 2 minutes
 
-  depends_on = [helm_release.longhorn, kubernetes_namespace.monitoring, kubernetes_config_map.grafana_cloudflare_auth]
+  depends_on = [helm_release.longhorn, kubernetes_namespace_v1.monitoring, kubernetes_config_map_v1.grafana_cloudflare_auth]
 }

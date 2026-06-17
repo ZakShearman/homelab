@@ -2,9 +2,9 @@ locals {
   traefik_cf_secret_name = "cloudflare-api-key"
 }
 
-resource "kubernetes_namespace" "traefik" {
+resource "kubernetes_namespace_v1" "traefik" {
   metadata {
-    name = var.traefik_namespace
+    name = "traefik"
     labels = {
       "app.kubernetes.io/managed-by"       = "terraform"
       "pod-security.kubernetes.io/enforce" = "privileged"
@@ -12,10 +12,10 @@ resource "kubernetes_namespace" "traefik" {
   }
 }
 
-resource "kubernetes_secret" "traefik_cf_api_key" {
+resource "kubernetes_secret_v1" "traefik_cf_api_key" {
   metadata {
     name      = local.traefik_cf_secret_name
-    namespace = var.traefik_namespace
+    namespace = kubernetes_namespace_v1.traefik.metadata[0].name
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
     }
@@ -26,14 +26,14 @@ resource "kubernetes_secret" "traefik_cf_api_key" {
     CLOUDFLARE_DNS_API_TOKEN = data.sops_file.secrets.data["cloudflare_dns_api_token"]
   }
 
-  depends_on = [kubernetes_namespace.traefik, data.sops_file.secrets]
+  depends_on = [kubernetes_namespace_v1.traefik, data.sops_file.secrets]
 }
 
 resource "helm_release" "traefik" {
   name       = "traefik"
   repository = "https://traefik.github.io/charts"
   chart      = "traefik"
-  namespace  = var.traefik_namespace
+  namespace  = kubernetes_namespace_v1.traefik.metadata[0].name
   version    = var.traefik_version
 
   # We create it manually above
@@ -136,41 +136,5 @@ resource "helm_release" "traefik" {
     })
   ]
 
-  depends_on = [kubernetes_namespace.traefik, kubernetes_secret.traefik_cf_api_key]
+  depends_on = [kubernetes_namespace_v1.traefik, kubernetes_secret_v1.traefik_cf_api_key]
 }
-
-# resource "kubectl_manifest" "traefik_redirect_all_http" {
-#   yaml_body = yamlencode({
-#     apiVersion = "traefik.io/v1alpha1"
-#     kind       = "IngressRoute"
-#
-#     metadata = {
-#       name      = "redirect-all-http"
-#       namespace = var.traefik_namespace
-#       annotations = {
-#         "app.kubernetes.io/managed-by" = "terraform"
-#       }
-#     }
-#
-#     spec = {
-#       entryPoints = ["web"]
-#       routes = [
-#         {
-#           kind  = "Rule"
-#           match = "HostRegexp(`.*\\.shearman\\.cloud`)"
-#           services = [
-#             {
-#               name = "speedtest-openspeedtest"
-#               port = 3000
-#             }
-#           ]
-#         }
-#       ]
-#       tls = {
-#         certResolver = "cloudflare"
-#       }
-#     }
-#   })
-#
-#   depends_on = [helm_release.traefik]
-# }

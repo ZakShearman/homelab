@@ -2,19 +2,19 @@ locals {
   cloudflare_secret_name = "cloudflare-tunnel-secret"
 }
 
-resource "kubernetes_namespace" "cloudflare" {
+resource "kubernetes_namespace_v1" "cloudflare" {
   metadata {
-    name = var.cloudflared_namespace
+    name = "cloudflared"
     labels = {
       "app.kubernetes.io/managed-by" = "terraform"
     }
   }
 }
 
-resource "kubernetes_secret" "cloudflare_tunnel_secret" {
+resource "kubernetes_secret_v1" "cloudflare_tunnel_secret" {
   metadata {
     name      = local.cloudflare_secret_name
-    namespace = var.cloudflared_namespace
+    namespace = kubernetes_namespace_v1.cloudflare.metadata[0].name
   }
 
   data = {
@@ -23,14 +23,14 @@ resource "kubernetes_secret" "cloudflare_tunnel_secret" {
 
   type = "Opaque"
 
-  depends_on = [kubernetes_namespace.cloudflare, data.sops_file.cloudflare_tunnel]
+  depends_on = [kubernetes_namespace_v1.cloudflare, data.sops_file.cloudflare_tunnel]
 }
 
 resource "helm_release" "cloudflared_tunnel" {
   name       = "cloudflared"
   repository = "https://cloudflare.github.io/helm-charts"
   chart      = "cloudflare-tunnel"
-  namespace  = var.cloudflared_namespace
+  namespace  = kubernetes_namespace_v1.cloudflare.metadata[0].name
   version    = var.cloudflared_helm_chart_version
 
   values = [
@@ -55,7 +55,7 @@ resource "helm_release" "cloudflared_tunnel" {
     })
   ]
 
-  depends_on = [kubernetes_secret.cloudflare_tunnel_secret, data.sops_file.secrets]
+  depends_on = [kubernetes_secret_v1.cloudflare_tunnel_secret, data.sops_file.secrets]
 
   wait = true
   # If the install fails, automatically roll back

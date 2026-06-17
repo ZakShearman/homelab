@@ -1,7 +1,7 @@
-resource "kubernetes_persistent_volume_claim" "immich_redis" {
+resource "kubernetes_persistent_volume_claim_v1" "immich_redis" {
   metadata {
     name      = "immich-redis-pvc"
-    namespace = var.immich_namespace
+    namespace = kubernetes_namespace_v1.immich.metadata[0].name
   }
 
   spec {
@@ -14,10 +14,10 @@ resource "kubernetes_persistent_volume_claim" "immich_redis" {
   }
 }
 
-resource "kubernetes_deployment" "immich_redis" {
+resource "kubernetes_deployment_v1" "immich_redis" {
   metadata {
     name      = "immich-redis"
-    namespace = var.immich_namespace
+    namespace = kubernetes_namespace_v1.immich.metadata[0].name
   }
 
 
@@ -79,7 +79,7 @@ resource "kubernetes_deployment" "immich_redis" {
         volume {
           name = "redis-storage"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.immich_redis.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim_v1.immich_redis.metadata[0].name
           }
         }
       }
@@ -92,10 +92,10 @@ resource "kubernetes_deployment" "immich_redis" {
   }
 }
 
-resource "kubernetes_service" "immich_redis" {
+resource "kubernetes_service_v1" "immich_redis" {
   metadata {
     name      = "immich-redis"
-    namespace = var.immich_namespace
+    namespace = kubernetes_namespace_v1.immich.metadata[0].name
   }
 
   spec {
